@@ -7,104 +7,80 @@ namespace Exorcist.Updater
     {
     }
 
-    public interface IUpdater
-    {
-        public void RegisterToEarlyUpdate(AManagedEarlyUpdate managedEarlyUpdate);
-        public void RegisterToUpdate(AManagedUpdate managedUpdate);
-        public void RegisterToLateUpdate(AManagedLateUpdate managedLateUpdate);
-        public void ManagedEarlyUpdate();
-        public void ManagedUpdate();
-        public void ManagedLateUpdate();
-    }
-
-
     public interface IManagedEarlyUpdate
     {
         public void ManagedEarlyUpdate();
     }
 
-    public abstract class AManagedEarlyUpdate : MonoBehaviour, IManagedEarlyUpdate
-    {
-        public AManagedEarlyUpdate next;
-
-        protected virtual void Awake()
-        {
-            App.Instance.Updater.RegisterToEarlyUpdate(this);
-        }
-
-        public virtual void ManagedEarlyUpdate()
-        {
-        }
-    }
 
     public interface IManagedUpdate
     {
         public void ManagedUpdate();
     }
 
-    public abstract class AManagedUpdate : MonoBehaviour, IManagedUpdate
-    {
-        private AManagedUpdate next;
 
-        protected virtual void Awake()
-        {
-            App.Instance.Updater.RegisterToUpdate(this);
-        }
-
-        public virtual void ManagedUpdate()
-        {
-        }
-    }
 
     public interface IManagedLateUpdate
     {
         public void ManagedLateUpdate();
     }
 
-    public abstract class AManagedLateUpdate : MonoBehaviour, IManagedLateUpdate
+
+    public class LinkedListMember<T>
     {
-        private AManagedLateUpdate next;
+        private T previous;
+        private T next;
+        private T value;
+    }
+
+    public class ManagedMonoBehavior : MonoBehaviour
+    {
+
 
         protected virtual void Awake()
         {
-            App.Instance.Updater.RegisterToLateUpdate(this);
-        }
-
-        public virtual void ManagedLateUpdate()
-        {
+            if (this is IManagedUpdate)
+            {
+                App.Instance.Updater.Register<IManagedUpdate>(this);
+            }
+            if (this is IManagedEarlyUpdate)
+            {
+                App.Instance.Updater.Register<IManagedEarlyUpdate>(this);
+            }
+            if (this is IManagedLateUpdate)
+            {
+                App.Instance.Updater.Register<IManagedLateUpdate>(this);
+            }
         }
     }
 
-    public abstract class AUpdater : IUpdater
+    public abstract class AUpdater : MonoBehaviour
     {
-        private AManagedEarlyUpdate _firstEarlyUpdate;
-        private AManagedEarlyUpdate _lastEarlyUpdate;
-        private AManagedUpdate _firstUpdate;
-        private AManagedUpdate _lastUpdate;
-        private AManagedLateUpdate _firstLateUpdate;
-        private AManagedLateUpdate _lastLateUpdate;
+        private LinkedListMember<IManagedEarlyUpdate> _firstEarlyUpdate;
+        private LinkedListMember<IManagedEarlyUpdate> _lastEarlyUpdate;
+        private LinkedListMember<IManagedUpdate> _firstUpdate;
+        private LinkedListMember<IManagedUpdate> _lastUpdate;
+        private LinkedListMember<IManagedLateUpdate> _firstLateUpdate;
+        private LinkedListMember<IManagedLateUpdate> _lastLateUpdate;
 
-        public void RegisterToEarlyUpdate(AManagedEarlyUpdate managedEarlyUpdate)
+        public void Register<T>(T updatedObject)
+        {
+        }
+        
+        public void Unregister<T>(T updatedObject)
+        {
+        }
+        
+
+        protected void ManagedEarlyUpdate()
         {
         }
 
-        public void RegisterToUpdate(AManagedUpdate managedUpdate)
+        protected void ManagedUpdate()
         {
         }
 
-        public void RegisterToLateUpdate(AManagedLateUpdate managedLateUpdate)
-        {
-        }
-
-        public void ManagedEarlyUpdate()
-        {
-        }
-
-        public void ManagedUpdate()
-        {
-        }
-
-        public void ManagedLateUpdate()
+        protected void ManagedLateUpdate()
         {
         }
     }
